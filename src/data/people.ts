@@ -953,7 +953,7 @@ const drafts: Draft[] = [
 
 export const people: Person[] = drafts.map((person) => ({
   ...person,
-  photo: portraits[person.id],
+  photo: portraits[person.id] ?? "",
   credit,
 }));
 

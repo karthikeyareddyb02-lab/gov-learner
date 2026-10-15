@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { people } from "@/data/people";
 import { PersonPhoto } from "@/components/PersonPhoto";
 
@@ -14,11 +14,14 @@ function shuffle<T>(items: T[]) {
 }
 
 export function FlashcardDeck() {
-  const openingDeck = useMemo(() => shuffle(people.map((person) => person.id)), []);
-  const [queue, setQueue] = useState(openingDeck);
+  const [queue, setQueue] = useState(people.map((person) => person.id));
   const [flipped, setFlipped] = useState(false);
   const [known, setKnown] = useState(0);
   const [again, setAgain] = useState(0);
+
+  useEffect(() => {
+    setQueue(shuffle(people.map((person) => person.id)));
+  }, []);
 
   const current = people.find((person) => person.id === queue[0]);
   const finished = queue.length === 0;

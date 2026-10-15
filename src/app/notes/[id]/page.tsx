@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { PersonPhoto } from "@/components/PersonPhoto";
 import { getPerson, people } from "@/data/people";
@@ -7,7 +8,19 @@ export function generateStaticParams() {
   return people.map((person) => ({ id: person.id }));
 }
 
-export default async function NotePage({ params }: PageProps<"/notes/[id]">) {
+function NoteFallback() {
+  return (
+    <main className="mx-auto grid max-w-5xl gap-8 px-4 py-8 sm:px-6 md:grid-cols-[280px_1fr]">
+      <div className="aspect-[4/5] rounded-3xl bg-line" />
+      <div>
+        <div className="h-4 w-24 rounded bg-line" />
+        <div className="mt-4 h-12 w-2/3 rounded bg-line" />
+      </div>
+    </main>
+  );
+}
+
+async function Note({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const person = getPerson(id);
   if (!person) notFound();
@@ -52,5 +65,13 @@ export default async function NotePage({ params }: PageProps<"/notes/[id]">) {
         </ul>
       </article>
     </main>
+  );
+}
+
+export default function NotePage({ params }: PageProps<"/notes/[id]">) {
+  return (
+    <Suspense fallback={<NoteFallback />}>
+      <Note params={params} />
+    </Suspense>
   );
 }
