@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { PersonPhoto } from "@/components/PersonPhoto";
 import { getPerson, people } from "@/data/people";
+import { isProminent } from "@/lib/roles";
 
 export function generateStaticParams() {
   return people.map((person) => ({ id: person.id }));
@@ -46,6 +47,9 @@ async function Note({ params }: { params: Promise<{ id: string }> }) {
         <Link href="/notes" className="text-sm font-medium text-maroon">
           All notes
         </Link>
+        {isProminent(person) && (
+          <p className="mt-3 text-sm font-semibold uppercase tracking-wide text-gold">Prominent</p>
+        )}
         <h1 className="mt-2 font-serif text-5xl leading-tight">{person.name}</h1>
         <p className="mt-2 text-lg text-muted">{person.role}</p>
         <dl className="mt-6 divide-y divide-line rounded-2xl border border-line bg-card">

@@ -5,8 +5,8 @@ export default function NotesPage() {
     <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
       <h1 className="font-serif text-4xl">Notes</h1>
       <p className="mt-2 max-w-2xl text-muted">
-        Open a card for the short facts: the post, the party, and whether that person is in the government,
-        in the opposition, a governor, or in the Union government in Delhi.
+        People are grouped by post. The gold cards are the prominent ones to learn first: the chief ministers,
+        governors, and the names that come up again and again.
       </p>
       <div className="mt-6">
         <NotesBrowser />

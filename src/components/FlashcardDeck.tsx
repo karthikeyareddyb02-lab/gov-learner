@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { people } from "@/data/people";
+import { isProminent } from "@/lib/roles";
 import { PersonPhoto } from "@/components/PersonPhoto";
 
 function shuffle<T>(items: T[]) {
@@ -81,6 +82,9 @@ export function FlashcardDeck() {
         <div className="px-5 py-4">
           {flipped ? (
             <>
+              {isProminent(current) && (
+                <p className="text-xs font-semibold uppercase tracking-wide text-gold">Prominent</p>
+              )}
               <h2 className="font-serif text-3xl">{current.name}</h2>
               <p className="mt-1 text-lg">
                 {current.role}
