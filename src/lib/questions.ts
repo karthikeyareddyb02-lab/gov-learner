@@ -1,9 +1,16 @@
 import { people } from "@/data/people";
-import type { Question } from "@/lib/types";
+import type { Person, Question } from "@/lib/types";
 
 const detailKinds = ["party", "role", "bench", "state"] as const;
+type DetailKind = (typeof detailKinds)[number];
 
-function detailQuestion(person: (typeof people)[number], kind: (typeof detailKinds)[number]): Question {
+function byId(id: string): Person {
+  const person = people.find((item) => item.id === id);
+  if (!person) throw new Error(`Missing person for the test: ${id}`);
+  return person;
+}
+
+function detailQuestion(person: Person, kind: DetailKind): Question {
   if (kind === "party") {
     return {
       id: `${person.id}:party`,
@@ -49,76 +56,106 @@ function detailQuestion(person: (typeof people)[number], kind: (typeof detailKin
   };
 }
 
-const nameQuestions: Question[] = people.map((person) => ({
-  id: `${person.id}:name`,
-  personId: person.id,
-  prompt: "Type this person's name.",
-  accept: person.aliases,
-}));
+function nameQuestion(person: Person): Question {
+  return {
+    id: `${person.id}:name`,
+    personId: person.id,
+    prompt: "Type this person's name.",
+    accept: person.aliases,
+  };
+}
 
-const detailPeople = [
+function questionsFor(ids: readonly string[], kind: "name" | "place" | DetailKind): Question[] {
+  return ids.map((id, index) => {
+    const person = byId(id);
+    if (kind === "name") return nameQuestion(person);
+    const chosen = kind === "place" ? (index % 2 === 0 ? "state" : "bench") : kind;
+    return detailQuestion(person, chosen);
+  });
+}
+
+const roster = [
   "revanth-reddy",
-  "kcr",
-  "ponnam-prabhakar",
-  "harish-rao",
-  "jagan",
-  "chandrababu-naidu",
-  "shiv-pratap-shukla",
-  "abdul-nazeer",
-  "pawan-kalyan",
   "bhatti-vikramarka",
-  "ktr",
-  "nara-lokesh",
+  "uttam-kumar-reddy",
+  "damodar-rajanarsimha",
+  "ponguleti-srinivas-reddy",
+  "ponnam-prabhakar",
   "seethakka",
-  "satya-kumar-yadav",
-  "kishan-reddy",
-  "bandi-sanjay",
-  "esl-narasimhan",
-  "tamilisai-soundararajan",
+  "shiv-pratap-shukla",
   "jishnu-dev-varma",
   "cp-radhakrishnan",
+  "tamilisai-soundararajan",
+  "esl-narasimhan",
+  "kcr",
+  "ktr",
+  "harish-rao",
   "akbaruddin-owaisi",
-  "sharmila",
-  "harichandan",
-  "uttam-kumar-reddy",
+  "sabitha-indra-reddy",
+  "kishan-reddy",
+  "bandi-sanjay",
+  "chandrababu-naidu",
+  "pawan-kalyan",
+  "nara-lokesh",
+  "satya-kumar-yadav",
+  "nadendla-manohar",
   "vangalapudi-anitha",
   "payyavula-keshav",
-  "kandula-durgesh",
-  "nadendla-manohar",
-  "mohammed-azharuddin",
-  "ponguleti-srinivas-reddy",
-  "sabitha-indra-reddy",
-  "errabelli-dayakar-rao",
-  "talasani-srinivas-yadav",
-  "srinivas-goud",
-  "damodar-rajanarsimha",
-  "komatireddy-venkat-reddy",
-  "sridhar-babu",
-  "jupally-krishna-rao",
-  "adluri-laxman-kumar",
-  "atchannaidu",
-  "farooq",
-  "sandhya-rani",
-  "savitha",
-  "gottipati-ravi",
-].map((id) => {
-  const person = people.find((item) => item.id === id);
-  if (!person) throw new Error(`Missing person for the test: ${id}`);
-  return person;
-});
+  "abdul-nazeer",
+  "harichandan",
+  "jagan",
+  "sharmila",
+] as const;
 
-const extraQuestions = detailPeople.map((person, index) =>
-  detailQuestion(person, detailKinds[index % detailKinds.length]),
-);
+export type Paper = {
+  id: string;
+  number: number;
+  title: string;
+  blurb: string;
+  questions: Question[];
+};
 
-export const testQuestions: Question[] = [...nameQuestions, ...extraQuestions];
+export const papers: Paper[] = [
+  {
+    id: "names",
+    number: 1,
+    title: "Names",
+    blurb: "Look at the photo and type the person's name.",
+    questions: questionsFor(roster.slice(0, 25), "name"),
+  },
+  {
+    id: "parties",
+    number: 2,
+    title: "Parties",
+    blurb: "Look at the photo and type the party. Appointed posts use Appointed.",
+    questions: questionsFor(roster.slice(5), "party"),
+  },
+  {
+    id: "posts",
+    number: 3,
+    title: "Posts",
+    blurb: "Look at the photo and type the post, such as Chief Minister or Governor.",
+    questions: questionsFor([...roster.slice(0, 15), ...roster.slice(20)], "role"),
+  },
+  {
+    id: "places",
+    number: 4,
+    title: "State and side",
+    blurb: "Type the state, or whether they are in the government, the opposition, or a governor.",
+    questions: questionsFor([...roster.slice(10), ...roster.slice(0, 5)], "place"),
+  },
+];
 
-if (testQuestions.length !== 100) {
-  throw new Error(`The test must have 100 questions. It has ${testQuestions.length}.`);
+for (const paper of papers) {
+  if (paper.questions.length !== 25) {
+    throw new Error(`${paper.title} must have 25 questions. It has ${paper.questions.length}.`);
+  }
+}
+
+export function getPaper(id: string) {
+  return papers.find((paper) => paper.id === id);
 }
 
 export function questionPerson(question: Question) {
-  const person = people.find((item) => item.id === question.personId);
-  if (!person) throw new Error(question.personId);
-  return person;
+  return byId(question.personId);
 }

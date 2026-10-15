@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { answersMatch } from "@/lib/grade";
-import { questionPerson, testQuestions } from "@/lib/questions";
+import { questionPerson } from "@/lib/questions";
+import type { Question } from "@/lib/types";
 import { PersonPhoto } from "@/components/PersonPhoto";
-
-const storageKey = "gov-learner-test-v1";
 
 type SavedTest = {
   index: number;
@@ -13,9 +13,19 @@ type SavedTest = {
   submitted: boolean;
 };
 
-export function TestRunner() {
+export function TestRunner({
+  paperId,
+  title,
+  questions,
+}: {
+  paperId: string;
+  title: string;
+  questions: Question[];
+}) {
+  const storageKey = `gov-learner-test-${paperId}`;
+  const total = questions.length;
   const [index, setIndex] = useState(0);
-  const [answers, setAnswers] = useState<string[]>(() => testQuestions.map(() => ""));
+  const [answers, setAnswers] = useState<string[]>(() => questions.map(() => ""));
   const [submitted, setSubmitted] = useState(false);
   const [ready, setReady] = useState(false);
 
@@ -24,7 +34,7 @@ export function TestRunner() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved) as SavedTest;
-        if (Array.isArray(parsed.answers) && parsed.answers.length === testQuestions.length) {
+        if (Array.isArray(parsed.answers) && parsed.answers.length === total) {
           setAnswers(parsed.answers);
           setIndex(parsed.index ?? 0);
           setSubmitted(Boolean(parsed.submitted));
@@ -34,50 +44,57 @@ export function TestRunner() {
       }
     }
     setReady(true);
-  }, []);
+  }, [storageKey, total]);
 
   useEffect(() => {
     if (!ready) return;
     const payload: SavedTest = { index, answers, submitted };
     window.localStorage.setItem(storageKey, JSON.stringify(payload));
-  }, [answers, index, ready, submitted]);
+  }, [answers, index, ready, storageKey, submitted]);
 
-  const marks = testQuestions.map((question, questionIndex) =>
+  const marks = questions.map((question, questionIndex) =>
     answersMatch(answers[questionIndex] ?? "", question.accept),
   );
   const score = marks.filter(Boolean).length;
-  const question = testQuestions[index];
-  const person = questionPerson(question);
+  const question = questions[index];
+  const person = question ? questionPerson(question) : null;
 
   function updateAnswer(value: string) {
     setAnswers((current) => current.map((answer, answerIndex) => (answerIndex === index ? value : answer)));
   }
 
   function reset() {
-    setAnswers(testQuestions.map(() => ""));
+    setAnswers(questions.map(() => ""));
     setIndex(0);
     setSubmitted(false);
     window.localStorage.removeItem(storageKey);
   }
 
+  if (!question || !person) return null;
+
   if (submitted) {
-    const missed = testQuestions
+    const missed = questions
       .map((item, itemIndex) => ({ item, itemIndex, correct: marks[itemIndex] }))
       .filter((entry) => !entry.correct);
 
     return (
       <section>
         <div className="rounded-3xl border border-line bg-card px-6 py-8">
-          <p className="text-sm font-medium uppercase tracking-[0.16em] text-maroon">Result</p>
+          <p className="text-sm font-medium uppercase tracking-[0.16em] text-maroon">{title}</p>
           <h2 className="mt-2 font-serif text-5xl">
-            {score} <span className="text-2xl text-muted">/ 100</span>
+            {score} <span className="text-2xl text-muted">/ {total}</span>
           </h2>
           <p className="mt-3 max-w-xl text-muted">
             Each question is one mark. A close spelling counts. {missed.length} answers still need another look.
           </p>
-          <button type="button" onClick={reset} className="mt-5 rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-paper">
-            Take the test again
-          </button>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <button type="button" onClick={reset} className="rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-paper">
+              Take this test again
+            </button>
+            <Link href="/test" className="rounded-full px-5 py-2.5 text-sm font-medium text-maroon">
+              All tests
+            </Link>
+          </div>
         </div>
         <ol className="mt-6 space-y-3">
           {missed.map(({ item, itemIndex }) => {
@@ -109,12 +126,12 @@ export function TestRunner() {
     <section className="mx-auto max-w-xl">
       <div className="mb-3 flex items-center justify-between text-sm text-muted">
         <span>
-          Question {index + 1} of 100
+          Question {index + 1} of {total}
         </span>
         <span>1 mark</span>
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-line">
-        <div className="h-full bg-maroon" style={{ width: `${((index + 1) / 100) * 100}%` }} />
+        <div className="h-full bg-maroon" style={{ width: `${((index + 1) / total) * 100}%` }} />
       </div>
       <div className="mt-4 overflow-hidden rounded-3xl border border-line bg-card">
         <div className="aspect-[4/5] bg-paper">
@@ -124,7 +141,7 @@ export function TestRunner() {
           className="px-5 py-4"
           onSubmit={(event) => {
             event.preventDefault();
-            if (index === testQuestions.length - 1) setSubmitted(true);
+            if (index === total - 1) setSubmitted(true);
             else setIndex((value) => value + 1);
           }}
         >
@@ -148,7 +165,7 @@ export function TestRunner() {
               Back
             </button>
             <button type="submit" className="rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-paper">
-              {index === testQuestions.length - 1 ? "Finish and mark" : "Next question"}
+              {index === total - 1 ? "Finish and mark" : "Next question"}
             </button>
           </div>
         </form>

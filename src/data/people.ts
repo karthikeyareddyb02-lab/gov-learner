@@ -951,11 +951,52 @@ const drafts: Draft[] = [
   },
 ];
 
-export const people: Person[] = drafts.map((person) => ({
-  ...person,
-  photo: portraits[person.id] ?? "",
-  credit,
-}));
+const studyIds = [
+  "revanth-reddy",
+  "bhatti-vikramarka",
+  "uttam-kumar-reddy",
+  "damodar-rajanarsimha",
+  "ponguleti-srinivas-reddy",
+  "ponnam-prabhakar",
+  "seethakka",
+  "shiv-pratap-shukla",
+  "jishnu-dev-varma",
+  "cp-radhakrishnan",
+  "tamilisai-soundararajan",
+  "esl-narasimhan",
+  "kcr",
+  "ktr",
+  "harish-rao",
+  "akbaruddin-owaisi",
+  "sabitha-indra-reddy",
+  "kishan-reddy",
+  "bandi-sanjay",
+  "chandrababu-naidu",
+  "pawan-kalyan",
+  "nara-lokesh",
+  "satya-kumar-yadav",
+  "nadendla-manohar",
+  "vangalapudi-anitha",
+  "payyavula-keshav",
+  "abdul-nazeer",
+  "harichandan",
+  "jagan",
+  "sharmila",
+];
+
+const studySet = new Set(studyIds);
+
+export const people: Person[] = drafts
+  .filter((person) => studySet.has(person.id))
+  .map((person) => ({
+    ...person,
+    photo: portraits[person.id] ?? "",
+    credit,
+  }));
+
+if (people.length !== 30) {
+  throw new Error(`The study list must have 30 people. It has ${people.length}.`);
+}
 
 export function getPerson(id: string) {
   return people.find((person) => person.id === id);

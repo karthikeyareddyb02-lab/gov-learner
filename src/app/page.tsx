@@ -28,7 +28,7 @@ export default function Home() {
         Learn the faces, the posts, and the parties.
       </h1>
       <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-        {people.length} notes, a flashcard deck, and a test of 100 questions. Each test question shows a
+        {people.length} notes, a flashcard deck, and four tests of 25 questions. Each question shows a
         photo and is worth one mark. A close spelling still scores.
       </p>
 
@@ -45,8 +45,8 @@ export default function Home() {
         </Link>
         <Link href="/test" className="rounded-3xl bg-ink p-5 text-paper hover:bg-maroon">
           <p className="text-sm font-medium text-gold">03</p>
-          <h2 className="mt-2 font-serif text-3xl">Test / 100</h2>
-          <p className="mt-2 text-paper/80">Type the name, the party, the post, or the state. One mark each.</p>
+          <h2 className="mt-2 font-serif text-3xl">4 tests / 25</h2>
+          <p className="mt-2 text-paper/80">Names, parties, posts, and state. Each paper is 25 marks.</p>
         </Link>
       </div>
 

@@ -16,7 +16,7 @@ const fraunces = Fraunces({
 
 export const metadata: Metadata = {
   title: "Gov Learner",
-  description: "Notes, flashcards, and a 100-mark test for Telangana and Andhra Pradesh leaders.",
+  description: "Notes, flashcards, and four 25-mark tests for Telangana and Andhra Pradesh leaders.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
