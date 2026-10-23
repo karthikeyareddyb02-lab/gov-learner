@@ -6,6 +6,7 @@ import { answersMatch } from "@/lib/grade";
 import { questionPerson } from "@/lib/questions";
 import type { Question } from "@/lib/types";
 import { PersonPhoto } from "@/components/PersonPhoto";
+import { SaluteMark } from "@/components/SaluteMark";
 
 type SavedTest = {
   index: number;
@@ -79,19 +80,21 @@ export function TestRunner({
 
     return (
       <section>
-        <div className="rounded-3xl border border-line bg-card px-6 py-8">
-          <p className="text-sm font-medium uppercase tracking-[0.16em] text-maroon">{title}</p>
-          <h2 className="mt-2 font-serif text-5xl">
+        <div className="panel px-6 py-8">
+          <p className="kicker">{title}</p>
+          <h2 className="mt-2 font-serif text-5xl leading-none tracking-tight">
             {score} <span className="text-2xl text-muted">/ {total}</span>
           </h2>
           <p className="mt-3 max-w-xl text-muted">
             Each question is one mark. A close spelling counts. {missed.length} answers still need another look.
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
-            <button type="button" onClick={reset} className="rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-paper">
+            <button type="button" onClick={reset} className="with-salute rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-paper">
+              <SaluteMark />
               Take this test again
             </button>
-            <Link href="/test" className="rounded-full px-5 py-2.5 text-sm font-medium text-maroon">
+            <Link href="/test" className="with-salute rounded-full px-5 py-2.5 text-sm font-medium text-maroon">
+              <SaluteMark />
               All tests
             </Link>
           </div>
@@ -100,7 +103,7 @@ export function TestRunner({
           {missed.map(({ item, itemIndex }) => {
             const missedPerson = questionPerson(item);
             return (
-              <li key={item.id} className="flex gap-3 rounded-2xl border border-line bg-card p-3">
+              <li key={item.id} className="panel flex gap-3 p-3">
                 <div className="h-24 w-20 shrink-0 overflow-hidden rounded-xl bg-paper">
                   <PersonPhoto src={missedPerson.photo} alt="" />
                 </div>
@@ -133,8 +136,8 @@ export function TestRunner({
       <div className="h-1.5 overflow-hidden rounded-full bg-line">
         <div className="h-full bg-maroon" style={{ width: `${((index + 1) / total) * 100}%` }} />
       </div>
-      <div className="mt-4 overflow-hidden rounded-3xl border border-line bg-card">
-        <div className="aspect-[4/5] bg-paper">
+      <div className="panel mt-4 overflow-hidden">
+        <div className="aspect-[4/5] bg-paper/70">
           <PersonPhoto src={person.photo} alt="" priority />
         </div>
         <form
@@ -145,7 +148,7 @@ export function TestRunner({
             else setIndex((value) => value + 1);
           }}
         >
-          <label htmlFor="answer" className="block font-serif text-2xl leading-snug">
+          <label htmlFor="answer" className="card-title block">
             {question.prompt}
           </label>
           <input
@@ -153,18 +156,20 @@ export function TestRunner({
             value={answers[index] ?? ""}
             onChange={(event) => updateAnswer(event.target.value)}
             autoComplete="off"
-            className="mt-4 w-full rounded-xl border border-line bg-paper px-3 py-3 text-lg outline-none ring-maroon/30 focus:ring-2"
+            className="field mt-4 px-3 py-3 text-lg"
           />
           <div className="mt-4 flex items-center justify-between gap-3">
             <button
               type="button"
               onClick={() => setIndex((value) => Math.max(0, value - 1))}
               disabled={index === 0}
-              className="rounded-full px-4 py-2 text-sm font-medium text-muted disabled:opacity-40"
+              className="with-salute rounded-full px-4 py-2 text-sm font-medium text-muted disabled:opacity-40"
             >
+              <SaluteMark />
               Back
             </button>
-            <button type="submit" className="rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-paper">
+            <button type="submit" className="with-salute rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-paper">
+              <SaluteMark />
               {index === total - 1 ? "Finish and mark" : "Next question"}
             </button>
           </div>

@@ -1,4 +1,5 @@
 import { portraits } from "@/data/portraits";
+import { assertStudyDifficulties } from "@/lib/difficulty";
 import type { Person } from "@/lib/types";
 
 const credit = "Photograph via Wikimedia Commons";
@@ -997,6 +998,8 @@ export const people: Person[] = drafts
 if (people.length !== 30) {
   throw new Error(`The study list must have 30 people. It has ${people.length}.`);
 }
+
+assertStudyDifficulties(people.map((person) => person.id));
 
 export function getPerson(id: string) {
   return people.find((person) => person.id === id);

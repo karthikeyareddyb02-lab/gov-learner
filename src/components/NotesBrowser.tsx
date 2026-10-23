@@ -4,28 +4,39 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { benchFilters, people } from "@/data/people";
 import { PersonPhoto } from "@/components/PersonPhoto";
+import { SaluteMark } from "@/components/SaluteMark";
+import { compareDifficulty, difficultyLabel, difficultyOf } from "@/lib/difficulty";
 import { isProminent, roleGroups } from "@/lib/roles";
 import type { Person } from "@/lib/types";
 
+const badgeTone = {
+  easy: "bg-green/10 text-green",
+  medium: "bg-gold/15 text-gold",
+  hard: "bg-maroon/10 text-maroon",
+} as const;
+
 function PersonCard({ person }: { person: Person }) {
   const prominent = isProminent(person);
+  const level = difficultyOf(person.id);
 
   return (
     <Link
       href={`/notes/${person.id}`}
-      className={`flex gap-3 rounded-2xl border bg-card p-3 transition hover:-translate-y-0.5 hover:shadow-md ${
-        prominent ? "border-gold ring-2 ring-gold/50" : "border-line"
+      className={`with-salute salute-card panel flex gap-3 rounded-2xl p-3 transition hover:-translate-y-0.5 hover:shadow-lg ${
+        prominent ? "ring-2 ring-gold/50" : ""
       }`}
     >
-      <div className="h-28 w-24 shrink-0 overflow-hidden rounded-xl bg-paper">
+      <SaluteMark />
+      <div className="h-24 w-20 shrink-0 overflow-hidden rounded-xl bg-paper">
         <PersonPhoto src={person.photo} alt="" />
       </div>
-      <div className="min-w-0">
-        {prominent && (
-          <p className="text-xs font-semibold uppercase tracking-wide text-gold">Prominent</p>
-        )}
-        <p className="font-serif text-lg leading-tight">{person.name}</p>
-        <p className="mt-1 text-sm text-ink">{person.role}</p>
+      <div className="min-w-0 pr-5">
+        <p className={`w-fit rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${badgeTone[level]}`}>
+          {difficultyLabel(level)}
+          {prominent ? " · Prominent" : ""}
+        </p>
+        <p className="mt-1 font-serif text-xl leading-tight">{person.name}</p>
+        <p className="mt-1 text-sm text-muted">{person.role}</p>
         <p className="text-sm text-muted">{person.party}</p>
         <p className="mt-2 text-xs font-medium uppercase tracking-wide text-maroon">{person.benchLabel}</p>
       </div>
@@ -67,13 +78,20 @@ export function NotesBrowser() {
     });
   }, [bench, query, role, state]);
 
-  const prominent = visible.filter(isProminent);
+  const prominent = visible
+    .filter(isProminent)
+    .sort((a, b) => compareDifficulty(a.id, b.id) || a.name.localeCompare(b.name));
   const groups = roleGroups
     .map((group) => ({
       ...group,
       people: visible
         .filter((person) => (group.roles as readonly string[]).includes(person.role))
-        .sort((a, b) => Number(isProminent(b)) - Number(isProminent(a)) || a.name.localeCompare(b.name)),
+        .sort(
+          (a, b) =>
+            compareDifficulty(a.id, b.id) ||
+            Number(isProminent(b)) - Number(isProminent(a)) ||
+            a.name.localeCompare(b.name),
+        ),
     }))
     .filter((group) => group.people.length > 0);
 
@@ -86,7 +104,7 @@ export function NotesBrowser() {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Name, party, constituency"
-            className="mt-1 w-full rounded-xl border border-line bg-card px-3 py-2 text-base text-ink outline-none ring-maroon/30 focus:ring-2"
+            className="field mt-1 px-3 py-2 text-base"
           />
         </label>
         <p className="text-sm text-muted">
@@ -101,10 +119,11 @@ export function NotesBrowser() {
             key={item}
             type="button"
             onClick={() => setState(item)}
-            className={`rounded-full px-3 py-1.5 text-sm ${
-              state === item ? "bg-ink text-paper" : "bg-card text-muted ring-1 ring-line"
+            className={`with-salute rounded-full px-3 py-1.5 text-sm ${
+              state === item ? "bg-ink text-paper" : "bg-card/80 text-muted ring-1 ring-white/70"
             }`}
           >
+            <SaluteMark />
             {item}
           </button>
         ))}
@@ -113,10 +132,11 @@ export function NotesBrowser() {
         <button
           type="button"
           onClick={() => setRole("all")}
-          className={`rounded-full px-3 py-1.5 text-sm ${
-            role === "all" ? "bg-ink text-paper" : "bg-card text-muted ring-1 ring-line"
+          className={`with-salute rounded-full px-3 py-1.5 text-sm ${
+            role === "all" ? "bg-ink text-paper" : "bg-card/80 text-muted ring-1 ring-white/70"
           }`}
         >
+          <SaluteMark />
           All roles
         </button>
         {roleGroups.map((item) => (
@@ -124,10 +144,11 @@ export function NotesBrowser() {
             key={item.id}
             type="button"
             onClick={() => setRole(item.id)}
-            className={`rounded-full px-3 py-1.5 text-sm ${
-              role === item.id ? "bg-ink text-paper" : "bg-card text-muted ring-1 ring-line"
+            className={`with-salute rounded-full px-3 py-1.5 text-sm ${
+              role === item.id ? "bg-ink text-paper" : "bg-card/80 text-muted ring-1 ring-white/70"
             }`}
           >
+            <SaluteMark />
             {item.label}
           </button>
         ))}
@@ -138,10 +159,11 @@ export function NotesBrowser() {
             key={item.id}
             type="button"
             onClick={() => setBench(item.id)}
-            className={`rounded-full px-3 py-1.5 text-sm ${
-              bench === item.id ? "bg-maroon text-paper" : "bg-card text-muted ring-1 ring-line"
+            className={`with-salute rounded-full px-3 py-1.5 text-sm ${
+              bench === item.id ? "bg-maroon text-paper" : "bg-card/80 text-muted ring-1 ring-white/70"
             }`}
           >
+            <SaluteMark />
             {item.label}
           </button>
         ))}
@@ -151,11 +173,11 @@ export function NotesBrowser() {
 
       {prominent.length > 0 && (
         <section className="mt-8" aria-labelledby="prominent-heading">
-          <h2 id="prominent-heading" className="font-serif text-3xl">
+          <h2 id="prominent-heading" className="section-title">
             Learn these first
           </h2>
           <p className="mt-1 text-sm text-muted">
-            The names that come up most often. They are listed again under their post, with a gold border.
+            The names that come up most often. They are listed again under their post, with easy names first.
           </p>
           <PersonGrid people={prominent} />
         </section>
@@ -163,9 +185,9 @@ export function NotesBrowser() {
 
       {groups.map((group) => (
         <section key={group.id} className="mt-10" aria-labelledby={`${group.id}-heading`}>
-          <h2 id={`${group.id}-heading`} className="font-serif text-3xl">
+          <h2 id={`${group.id}-heading`} className="section-title">
             {group.label}
-            <span className="ml-2 text-lg text-muted">{group.people.length}</span>
+            <span className="ml-2 font-sans text-base font-normal text-muted">{group.people.length}</span>
           </h2>
           <PersonGrid people={group.people} />
         </section>

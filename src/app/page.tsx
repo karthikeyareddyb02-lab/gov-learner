@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SaluteMark } from "@/components/SaluteMark";
 import { people } from "@/data/people";
 
 const jobs = [
@@ -22,40 +23,42 @@ const jobs = [
 
 export default function Home() {
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <p className="text-sm font-medium uppercase tracking-[0.18em] text-maroon">Telangana and Andhra Pradesh</p>
-      <h1 className="mt-2 max-w-3xl font-serif text-5xl leading-tight tracking-tight sm:text-6xl">
-        Learn the faces, the posts, and the parties.
-      </h1>
-      <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-        {people.length} notes, a flashcard deck, and four tests of 25 questions. Each question shows a
+    <main className="shell">
+      <p className="kicker">Telangana and Andhra Pradesh</p>
+      <h1 className="page-title">Learn the faces, the posts, and the parties.</h1>
+      <p className="lede">
+        {people.length} leaders, three flashcard levels, and four tests of 25 questions. Each question shows a
         photo and is worth one mark. A close spelling still scores.
       </p>
 
-      <div className="mt-8 grid gap-4 md:grid-cols-3">
-        <Link href="/notes" className="rounded-3xl border border-line bg-card p-5 hover:shadow-md">
-          <p className="text-sm font-medium text-maroon">01</p>
-          <h2 className="mt-2 font-serif text-3xl">Notes</h2>
-          <p className="mt-2 text-muted">Photo, post, party, constituency, and which government they work in.</p>
+      <div className="mt-10 grid gap-4 md:grid-cols-3">
+        <Link href="/notes" className="with-salute salute-card rounded-3xl bg-ink p-5 text-paper shadow-[0_14px_40px_rgba(11,42,74,0.18)] transition hover:-translate-y-0.5 hover:bg-maroon">
+          <SaluteMark />
+          <p className="kicker text-gold">01 · Start here</p>
+          <h2 className="card-title">About leaders</h2>
+          <p className="mt-2 text-paper/80">Photo, post, party, and whether they sit in the government or the opposition.</p>
         </Link>
-        <Link href="/flashcards" className="rounded-3xl border border-line bg-card p-5 hover:shadow-md">
-          <p className="text-sm font-medium text-maroon">02</p>
-          <h2 className="mt-2 font-serif text-3xl">Flashcards</h2>
-          <p className="mt-2 text-muted">{people.length} cards. The photo is the front. Tap to check the answer.</p>
+        <Link href="/flashcards" className="with-salute salute-card panel p-5 transition hover:-translate-y-0.5 hover:shadow-lg">
+          <SaluteMark />
+          <p className="kicker">02</p>
+          <h2 className="card-title">Flashcards</h2>
+          <p className="mt-2 text-muted">Easy, medium, and hard. Ten portraits in each deck.</p>
         </Link>
-        <Link href="/test" className="rounded-3xl bg-ink p-5 text-paper hover:bg-maroon">
-          <p className="text-sm font-medium text-gold">03</p>
-          <h2 className="mt-2 font-serif text-3xl">4 tests / 25</h2>
-          <p className="mt-2 text-paper/80">Names, parties, posts, and state. Each paper is 25 marks.</p>
+        <Link href="/test" className="with-salute salute-card panel p-5 transition hover:-translate-y-0.5 hover:shadow-lg">
+          <SaluteMark />
+          <p className="kicker">03</p>
+          <h2 className="card-title">4 tests / 25</h2>
+          <p className="mt-2 text-muted">Names, parties, posts, and state. Each paper is 25 marks.</p>
         </Link>
       </div>
 
-      <section className="mt-12">
-        <h2 className="font-serif text-3xl">How these jobs fit together</h2>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+      <section className="mt-16 border-t border-line/80 pt-10">
+        <p className="kicker">Background</p>
+        <h2 className="section-title mt-2">How these jobs fit together</h2>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
           {jobs.map((job) => (
-            <article key={job.title} className="rounded-2xl border border-line bg-card p-5">
-              <h3 className="font-serif text-2xl">{job.title}</h3>
+            <article key={job.title} className="panel p-5">
+              <h3 className="font-serif text-xl">{job.title}</h3>
               <p className="mt-2 leading-7 text-muted">{job.body}</p>
             </article>
           ))}

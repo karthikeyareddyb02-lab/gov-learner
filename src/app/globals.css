@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --paper: #f4efe4;
-  --ink: #1c1712;
-  --muted: #5e564c;
-  --line: #e2d8c8;
-  --card: #fffaf3;
-  --maroon: #7c2430;
-  --blue: #1d4e89;
-  --gold: #8a5a12;
-  --green: #1c6b45;
+  --paper: #e4f1fb;
+  --ink: #0b2a4a;
+  --muted: #3e6284;
+  --line: #c5d8ec;
+  --card: #f5faff;
+  --maroon: #0e4f86;
+  --blue: #3d89d4;
+  --gold: #2f6ea3;
+  --green: #1577c2;
 }
 
 @theme inline {
@@ -27,11 +27,397 @@
 }
 
 body {
-  background: var(--paper);
+  background: #d6e8f8;
   color: var(--ink);
   font-family: var(--font-source), "Source Sans 3", sans-serif;
 }
 
+.shell {
+  width: min(72rem, 100%);
+  margin-inline: auto;
+  padding: 2.25rem 1rem 4.5rem;
+}
+
+@media (min-width: 640px) {
+  .shell {
+    padding-inline: 1.5rem;
+  }
+}
+
+.panel {
+  border: 1px solid color-mix(in srgb, white 70%, var(--line));
+  border-radius: 1.5rem;
+  background: color-mix(in srgb, var(--card) 78%, transparent);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 14px 40px rgba(11, 42, 74, 0.08);
+}
+
+.field {
+  width: 100%;
+  border: 1px solid color-mix(in srgb, white 55%, var(--line));
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, white 72%, transparent);
+  color: var(--ink);
+  outline: none;
+}
+
+.field:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--maroon) 25%, transparent);
+}
+
+.kicker {
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--maroon);
+}
+
+.text-paper > .kicker {
+  color: #d6ebfa;
+}
+
+.page-title {
+  margin-top: 0.7rem;
+  max-width: 16em;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: clamp(2.5rem, 5vw, 3.75rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.lede {
+  max-width: 40rem;
+  margin-top: 0.9rem;
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.section-title {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: clamp(1.55rem, 2.2vw, 1.9rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.card-title {
+  margin-top: 0.65rem;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 1.6rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.sky {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.sky-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+html[data-sky-ready="true"] .sky-layer {
+  transition: opacity 45s linear;
+}
+
+.sky-morning {
+  background:
+    radial-gradient(circle at 78% 22%, rgba(214, 236, 255, 0.55) 0 7%, transparent 20%),
+    linear-gradient(180deg, #2f74b5 0%, #4e93cc 52%, #6aa8d8 100%);
+}
+
+.sky-afternoon {
+  background:
+    radial-gradient(circle at 64% 10%, rgba(255, 255, 255, 0.9) 0 6%, transparent 18%),
+    linear-gradient(180deg, #c5e4f8 0%, #e4f3fc 48%, #f7fbff 100%);
+}
+
+.sky-night {
+  background:
+    radial-gradient(circle at 18% 16%, rgba(176, 208, 240, 0.28) 0 4%, transparent 14%),
+    linear-gradient(180deg, #061628 0%, #0c2744 46%, #14365c 100%);
+}
+
+.sky-sun,
+.sky-rays,
+.sky-moon,
+.sky-cloud,
+.sky-stars {
+  position: absolute;
+}
+
+.sky-sun {
+  top: 14%;
+  right: 12%;
+  width: 7.5rem;
+  height: 7.5rem;
+  border-radius: 999px;
+  background: #f4fbff;
+  box-shadow: 0 0 40px 16px rgba(150, 205, 245, 0.85);
+}
+
+.sky-sun-high {
+  top: 6%;
+  right: 28%;
+  width: 5.5rem;
+  height: 5.5rem;
+  box-shadow: 0 0 28px 10px rgba(170, 214, 245, 0.75);
+}
+
+.sky-rays {
+  top: 8%;
+  right: 6%;
+  width: 16rem;
+  height: 16rem;
+  background: repeating-conic-gradient(from 0deg, rgba(186, 220, 248, 0.45) 0 8deg, transparent 8deg 20deg);
+  mask-image: radial-gradient(circle, transparent 0 28%, #000 42%, transparent 70%);
+}
+
+.sky-cloud {
+  height: 2.4rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  filter: blur(0.2px);
+}
+
+.sky-cloud::before,
+.sky-cloud::after {
+  content: "";
+  position: absolute;
+  background: inherit;
+  border-radius: inherit;
+}
+
+.sky-cloud-a {
+  top: 18%;
+  left: 12%;
+  width: 7rem;
+}
+
+.sky-cloud-a::before {
+  width: 3rem;
+  height: 3rem;
+  top: -1.3rem;
+  left: 1rem;
+}
+
+.sky-cloud-a::after {
+  width: 2.2rem;
+  height: 2.2rem;
+  top: -0.8rem;
+  left: 3.2rem;
+}
+
+.sky-cloud-b {
+  top: 28%;
+  right: 10%;
+  width: 5.5rem;
+}
+
+.sky-cloud-b::before {
+  width: 2.4rem;
+  height: 2.4rem;
+  top: -1rem;
+  left: 0.8rem;
+}
+
+.sky-moon {
+  top: 12%;
+  left: 14%;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 999px;
+  background: #e8f4fc;
+  box-shadow:
+    inset -10px -6px 0 rgba(150, 186, 214, 0.55),
+    0 0 28px 8px rgba(170, 210, 240, 0.7);
+}
+
+.sky-stars span {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 0 6px 1px rgba(255, 255, 255, 0.8);
+}
+
+.sky-hill {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 16vh;
+}
+
+.sky-morning .sky-hill {
+  background:
+    radial-gradient(60% 140% at 20% 120%, #1a4f86, transparent 70%),
+    radial-gradient(50% 140% at 72% 130%, #143e6b, transparent 72%);
+}
+
+.sky-afternoon .sky-hill {
+  background:
+    radial-gradient(60% 140% at 16% 120%, #9ec9ea, transparent 70%),
+    radial-gradient(55% 150% at 78% 130%, #b7d7f2, transparent 72%);
+}
+
+.sky-night .sky-hill {
+  background:
+    radial-gradient(60% 140% at 18% 120%, #04101c, transparent 70%),
+    radial-gradient(55% 150% at 80% 130%, #02070e, transparent 72%);
+}
+
+/* Sky-facing text stays light on the normal morning blue and the dark night blue. */
+html[data-daypart="morning"] .shell,
+html[data-daypart="night"] .shell {
+  color: #f4f9fd;
+}
+
+html[data-daypart="morning"] .shell .kicker,
+html[data-daypart="night"] .shell .kicker,
+html[data-daypart="morning"] .shell .text-maroon,
+html[data-daypart="night"] .shell .text-maroon {
+  color: #e8f4fc;
+}
+
+html[data-daypart="morning"] .shell :is(.lede, .text-muted),
+html[data-daypart="night"] .shell :is(.lede, .text-muted) {
+  color: #d5e6f5;
+}
+
+html[data-daypart="morning"] .shell :is(.panel, .field),
+html[data-daypart="night"] .shell :is(.panel, .field),
+html[data-daypart="morning"] .shell button,
+html[data-daypart="night"] .shell button {
+  color: #0b2a4a;
+}
+
+html[data-daypart="morning"] .shell :is(.panel, .field, button) :is(.lede, .text-muted),
+html[data-daypart="night"] .shell :is(.panel, .field, button) :is(.lede, .text-muted),
+html[data-daypart="morning"] .shell :is(.panel, .field, button).text-muted,
+html[data-daypart="night"] .shell :is(.panel, .field, button).text-muted {
+  color: var(--muted);
+}
+
+html[data-daypart="morning"] .shell :is(.panel, .field) .kicker,
+html[data-daypart="night"] .shell :is(.panel, .field) .kicker,
+html[data-daypart="morning"] .shell :is(.panel, button) .text-maroon,
+html[data-daypart="night"] .shell :is(.panel, button) .text-maroon {
+  color: var(--maroon);
+}
+
+html[data-daypart="morning"] .shell button.text-paper,
+html[data-daypart="night"] .shell button.text-paper,
+html[data-daypart="morning"] .shell button.text-white,
+html[data-daypart="night"] .shell button.text-white {
+  color: #f7fbff;
+}
+
+body > :not(.sky) {
+  position: relative;
+  z-index: 1;
+}
+
+.with-salute:not(.salute-card) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.salute-card {
+  position: relative;
+}
+
+.salute-card > .salute {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+}
+
+.salute {
+  position: relative;
+  display: inline-block;
+  width: 0;
+  height: 16px;
+  opacity: 0;
+  overflow: visible;
+  transition:
+    width 0.22s ease,
+    opacity 0.18s ease;
+}
+
+.salute-head,
+.salute-torso,
+.salute-arm {
+  position: absolute;
+  background: currentColor;
+}
+
+.salute-head {
+  top: 0;
+  left: 4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+}
+
+.salute-torso {
+  top: 7px;
+  left: 5px;
+  width: 4px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.salute-arm {
+  top: 8px;
+  left: 5px;
+  width: 8px;
+  height: 2px;
+  border-radius: 999px;
+  transform-origin: left center;
+  transform: rotate(32deg);
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.salute-arm::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  top: -2px;
+  width: 3px;
+  height: 3px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.with-salute:not(:disabled):hover .salute,
+.with-salute:not(:disabled):focus-visible .salute {
+  width: 14px;
+  opacity: 1;
+}
+
+.with-salute:not(:disabled):hover .salute-arm,
+.with-salute:not(:disabled):focus-visible .salute-arm {
+  transform: rotate(-76deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sky-layer,
+  .salute,
+  .salute-arm {
+    transition: none;
+  }
+}
+
 ::selection {
-  background: #f0d3c4;
+  background: #c5dff5;
 }

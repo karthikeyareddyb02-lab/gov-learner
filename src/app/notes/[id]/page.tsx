@@ -2,7 +2,9 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { PersonPhoto } from "@/components/PersonPhoto";
+import { SaluteMark } from "@/components/SaluteMark";
 import { getPerson, people } from "@/data/people";
+import { difficultyLabel, difficultyOf } from "@/lib/difficulty";
 import { isProminent } from "@/lib/roles";
 
 export function generateStaticParams() {
@@ -11,8 +13,8 @@ export function generateStaticParams() {
 
 function NoteFallback() {
   return (
-    <main className="mx-auto grid max-w-5xl gap-8 px-4 py-8 sm:px-6 md:grid-cols-[280px_1fr]">
-      <div className="aspect-[4/5] rounded-3xl bg-line" />
+    <main className="shell grid max-w-5xl gap-8 md:grid-cols-[240px_1fr]">
+      <div className="aspect-[4/5] rounded-3xl bg-white/40" />
       <div>
         <div className="h-4 w-24 rounded bg-line" />
         <div className="mt-4 h-12 w-2/3 rounded bg-line" />
@@ -35,24 +37,28 @@ async function Note({ params }: { params: Promise<{ id: string }> }) {
     ["Departments", person.portfolio],
   ].filter((row) => row[1]);
 
+  const level = difficultyOf(person.id);
+
   return (
-    <main className="mx-auto grid max-w-5xl gap-8 px-4 py-8 sm:px-6 md:grid-cols-[280px_1fr]">
-      <div className="overflow-hidden rounded-3xl border border-line bg-card">
+    <main className="shell grid max-w-5xl gap-8 md:grid-cols-[240px_1fr]">
+      <div className="panel overflow-hidden">
         <div className="aspect-[4/5]">
           <PersonPhoto src={person.photo} alt={person.name} priority />
         </div>
         <p className="px-4 py-3 text-xs text-muted">{person.credit}</p>
       </div>
       <article>
-        <Link href="/notes" className="text-sm font-medium text-maroon">
-          All notes
+        <Link href="/notes" className="with-salute text-sm font-medium text-maroon">
+          <SaluteMark />
+          About leaders
         </Link>
-        {isProminent(person) && (
-          <p className="mt-3 text-sm font-semibold uppercase tracking-wide text-gold">Prominent</p>
-        )}
-        <h1 className="mt-2 font-serif text-5xl leading-tight">{person.name}</h1>
-        <p className="mt-2 text-lg text-muted">{person.role}</p>
-        <dl className="mt-6 divide-y divide-line rounded-2xl border border-line bg-card">
+        <p className="mt-4 w-fit rounded-full bg-ink px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-paper">
+          {difficultyLabel(level)}
+          {isProminent(person) ? " · Prominent" : ""}
+        </p>
+        <h1 className="page-title">{person.name}</h1>
+        <p className="lede">{person.role}</p>
+        <dl className="panel mt-6 divide-y divide-line">
           {rows.map(([label, value]) => (
             <div key={label} className="grid gap-1 px-4 py-3 sm:grid-cols-[160px_1fr]">
               <dt className="text-sm text-muted">{label}</dt>
