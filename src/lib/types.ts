@@ -24,4 +24,6 @@ export type Question = {
   personId: string;
   prompt: string;
   accept: string[];
+  marks: 1 | 3;
+  parts?: [string[], string[], string[]];
 };

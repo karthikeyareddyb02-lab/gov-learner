@@ -49,3 +49,51 @@ export function answersMatch(input: string, accepted: string[]) {
     return distance / longer <= 0.18;
   });
 }
+
+export function answerIncludes(input: string, accepted: string[]) {
+  const typed = normalize(input);
+  if (typed.length < 2) return false;
+  const words = typed.split(" ").filter(Boolean);
+  const windows = [...words];
+  for (let index = 0; index < words.length - 1; index += 1) {
+    windows.push(`${words[index]} ${words[index + 1]}`);
+  }
+  for (let index = 0; index < words.length - 2; index += 1) {
+    windows.push(`${words[index]} ${words[index + 1]} ${words[index + 2]}`);
+  }
+
+  return accepted.some((answer) => {
+    const expected = normalize(answer);
+    if (expected.length < 2) return false;
+    if (typed.includes(expected)) return true;
+    return windows.some((window) => answersMatch(window, [answer]));
+  });
+}
+
+const partLabels = ["Post", "Party", "Where they sit"] as const;
+
+export type AnswerReport = {
+  earned: number;
+  parts: { label: string; found: boolean }[] | null;
+};
+
+export function answerReport(
+  input: string,
+  question: { marks: 1 | 3; accept: string[]; parts?: [string[], string[], string[]] },
+): AnswerReport {
+  if (question.marks === 3 && question.parts) {
+    const parts = question.parts.map((aliases, index) => ({
+      label: partLabels[index] ?? "Part",
+      found: answerIncludes(input, aliases),
+    }));
+    return { earned: parts.every((part) => part.found) ? 3 : 0, parts };
+  }
+  return { earned: answersMatch(input, question.accept) ? 1 : 0, parts: null };
+}
+
+export function marksAwarded(
+  input: string,
+  question: { marks: 1 | 3; accept: string[]; parts?: [string[], string[], string[]] },
+) {
+  return answerReport(input, question).earned;
+}

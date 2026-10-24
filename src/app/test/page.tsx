@@ -8,8 +8,8 @@ export default function TestPage() {
       <p className="kicker">Step 3</p>
       <h1 className="page-title">Four tests, 25 marks each</h1>
       <p className="lede">
-        Each paper has 25 questions and each question is one mark. Every question shows a photo. A close
-        spelling still scores.
+        Each paper has 15 questions and is worth 25 marks. Ten short answers are 1 mark. Five sentences are 3
+        marks, and only a complete sentence scores. A close spelling still scores on a short answer.
       </p>
       <ol className="mt-8 grid gap-4 md:grid-cols-2">
         {papers.map((paper) => (

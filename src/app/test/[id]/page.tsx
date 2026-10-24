@@ -27,7 +27,7 @@ async function Paper({ params }: { params: Promise<{ id: string }> }) {
       <h1 className="page-title">
         Test {paper.number}: {paper.title}
       </h1>
-      <p className="lede">{paper.blurb} One mark each, out of 25.</p>
+      <p className="lede">{paper.blurb} The paper is out of 25.</p>
       <div className="mt-6">
         <TestRunner paperId={paper.id} title={paper.title} questions={paper.questions} />
       </div>

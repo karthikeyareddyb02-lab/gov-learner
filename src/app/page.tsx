@@ -27,8 +27,7 @@ export default function Home() {
       <p className="kicker">Telangana and Andhra Pradesh</p>
       <h1 className="page-title">Learn the faces, the posts, and the parties.</h1>
       <p className="lede">
-        {people.length} leaders, three flashcard levels, and four tests of 25 questions. Each question shows a
-        photo and is worth one mark. A close spelling still scores.
+        {people.length} leaders, three flashcard levels, and four tests of 15 questions. Each paper is 25 marks.
       </p>
 
       <div className="mt-10 grid gap-4 md:grid-cols-3">
@@ -48,7 +47,7 @@ export default function Home() {
           <SaluteMark />
           <p className="kicker">03</p>
           <h2 className="card-title">4 tests / 25</h2>
-          <p className="mt-2 text-muted">Names, parties, posts, and state. Each paper is 25 marks.</p>
+          <p className="mt-2 text-muted">Ten short answers and five 3-mark sentences. Each paper is 25 marks.</p>
         </Link>
       </div>
 
