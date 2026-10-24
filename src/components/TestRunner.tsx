@@ -183,8 +183,10 @@ export function TestRunner({
             only a complete sentence scores.
           </span>
         </p>
-        <div className="aspect-[4/5] bg-paper/70">
-          <PersonPhoto src={person.photo} alt="" priority />
+        <div className="flex justify-center px-5 pb-1 pt-5">
+          <div className="aspect-[4/5] w-44 overflow-hidden rounded-2xl bg-paper shadow-sm sm:w-52">
+            <PersonPhoto src={person.photo} alt="" priority />
+          </div>
         </div>
         <form
           className="px-5 py-4"
