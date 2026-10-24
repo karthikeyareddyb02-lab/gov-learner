@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { answersMatch } from "@/lib/grade";
-import { questionPerson } from "@/lib/questions";
+import { answerReport, type AnswerReport } from "@/lib/grade";
+import { paperMarks, questionPerson } from "@/lib/questions";
 import type { Question } from "@/lib/types";
 import { PersonPhoto } from "@/components/PersonPhoto";
 import { SaluteMark } from "@/components/SaluteMark";
@@ -13,6 +13,32 @@ type SavedTest = {
   answers: string[];
   submitted: boolean;
 };
+
+function AnswerAccuracy({ report }: { report: AnswerReport }) {
+  if (!report.parts) {
+    return (
+      <p className="text-sm">
+        Accuracy: <span className="font-medium">{report.earned === 1 ? "Accurate" : "Not accurate"}</span>
+      </p>
+    );
+  }
+
+  const found = report.parts.filter((part) => part.found).length;
+  return (
+    <p className="text-sm">
+      Accuracy: <span className="font-medium">{found} of 3 parts</span>
+      {" · "}
+      {report.parts.map((part, index) => (
+        <span key={part.label}>
+          {index > 0 ? ", " : null}
+          <span className={part.found ? "font-medium" : "text-maroon"}>
+            {part.label} {part.found ? "found" : "missing"}
+          </span>
+        </span>
+      ))}
+    </p>
+  );
+}
 
 export function TestRunner({
   paperId,
@@ -24,7 +50,7 @@ export function TestRunner({
   questions: Question[];
 }) {
   const storageKey = `gov-learner-test-${paperId}`;
-  const total = questions.length;
+  const total = paperMarks(questions);
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<string[]>(() => questions.map(() => ""));
   const [submitted, setSubmitted] = useState(false);
@@ -35,7 +61,7 @@ export function TestRunner({
     if (saved) {
       try {
         const parsed = JSON.parse(saved) as SavedTest;
-        if (Array.isArray(parsed.answers) && parsed.answers.length === total) {
+        if (Array.isArray(parsed.answers) && parsed.answers.length === questions.length) {
           setAnswers(parsed.answers);
           setIndex(parsed.index ?? 0);
           setSubmitted(Boolean(parsed.submitted));
@@ -45,7 +71,7 @@ export function TestRunner({
       }
     }
     setReady(true);
-  }, [storageKey, total]);
+  }, [storageKey, questions.length]);
 
   useEffect(() => {
     if (!ready) return;
@@ -53,10 +79,11 @@ export function TestRunner({
     window.localStorage.setItem(storageKey, JSON.stringify(payload));
   }, [answers, index, ready, storageKey, submitted]);
 
-  const marks = questions.map((question, questionIndex) =>
-    answersMatch(answers[questionIndex] ?? "", question.accept),
+  const reports = questions.map((question, questionIndex) =>
+    answerReport(answers[questionIndex] ?? "", question),
   );
-  const score = marks.filter(Boolean).length;
+  const score = reports.reduce((sum, report) => sum + report.earned, 0);
+  const accuracy = total === 0 ? 0 : Math.round((score / total) * 100);
   const question = questions[index];
   const person = question ? questionPerson(question) : null;
 
@@ -74,9 +101,12 @@ export function TestRunner({
   if (!question || !person) return null;
 
   if (submitted) {
-    const missed = questions
-      .map((item, itemIndex) => ({ item, itemIndex, correct: marks[itemIndex] }))
-      .filter((entry) => !entry.correct);
+    const reviewed = questions.map((item, itemIndex) => ({
+      item,
+      itemIndex,
+      report: reports[itemIndex],
+    }));
+    const fullyAccurate = reviewed.filter((entry) => entry.report.earned === entry.item.marks).length;
 
     return (
       <section>
@@ -85,8 +115,10 @@ export function TestRunner({
           <h2 className="mt-2 font-serif text-5xl leading-none tracking-tight">
             {score} <span className="text-2xl text-muted">/ {total}</span>
           </h2>
+          <p className="mt-3 font-serif text-3xl leading-none tracking-tight">{accuracy}% accurate</p>
           <p className="mt-3 max-w-xl text-muted">
-            Each question is one mark. A close spelling counts. {missed.length} answers still need another look.
+            {fullyAccurate} of {questions.length} answers are fully accurate. A sentence shows how many of its
+            three parts were found. It still scores only when all three are there.
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <button type="button" onClick={reset} className="with-salute rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-paper">
@@ -100,22 +132,29 @@ export function TestRunner({
           </div>
         </div>
         <ol className="mt-6 space-y-3">
-          {missed.map(({ item, itemIndex }) => {
-            const missedPerson = questionPerson(item);
+          {reviewed.map(({ item, itemIndex, report }) => {
+            const reviewedPerson = questionPerson(item);
+            const complete = report.earned === item.marks;
             return (
               <li key={item.id} className="panel flex gap-3 p-3">
                 <div className="h-24 w-20 shrink-0 overflow-hidden rounded-xl bg-paper">
-                  <PersonPhoto src={missedPerson.photo} alt="" />
+                  <PersonPhoto src={reviewedPerson.photo} alt="" />
                 </div>
                 <div>
                   <p className="text-sm text-muted">Question {itemIndex + 1}</p>
                   <p className="font-medium">{item.prompt}</p>
                   <p className="mt-1 text-sm">
-                    You typed: <span className="text-maroon">{answers[itemIndex] || "—"}</span>
+                    You typed: <span className={complete ? "font-medium" : "text-maroon"}>{answers[itemIndex] || "—"}</span>
                   </p>
+                  <AnswerAccuracy report={report} />
                   <p className="text-sm">
-                    Answer: <span className="font-medium">{item.accept[0]}</span>
+                    Mark: <span className="font-medium">{report.earned} / {item.marks}</span>
                   </p>
+                  {complete ? null : (
+                    <p className="text-sm">
+                      Answer: <span className="font-medium">{item.accept[0]}</span>
+                    </p>
+                  )}
                 </div>
               </li>
             );
@@ -129,14 +168,21 @@ export function TestRunner({
     <section className="mx-auto max-w-xl">
       <div className="mb-3 flex items-center justify-between text-sm text-muted">
         <span>
-          Question {index + 1} of {total}
+          Question {index + 1} of {questions.length}
         </span>
-        <span>1 mark</span>
+        <span>{question.marks === 3 ? "3 marks" : "1 mark"}</span>
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-line">
-        <div className="h-full bg-maroon" style={{ width: `${((index + 1) / total) * 100}%` }} />
+        <div className="h-full bg-maroon" style={{ width: `${((index + 1) / questions.length) * 100}%` }} />
       </div>
       <div className="panel mt-4 overflow-hidden">
+        <p className="border-b border-line px-5 py-3 text-sm leading-snug">
+          <span className="font-medium">This test is 25 marks.</span>{" "}
+          <span className="text-muted">
+            10 short answers are 1 mark each. A close spelling still scores. 5 sentences are 3 marks each, and
+            only a complete sentence scores.
+          </span>
+        </p>
         <div className="aspect-[4/5] bg-paper/70">
           <PersonPhoto src={person.photo} alt="" priority />
         </div>
@@ -144,20 +190,31 @@ export function TestRunner({
           className="px-5 py-4"
           onSubmit={(event) => {
             event.preventDefault();
-            if (index === total - 1) setSubmitted(true);
+            if (index === questions.length - 1) setSubmitted(true);
             else setIndex((value) => value + 1);
           }}
         >
           <label htmlFor="answer" className="card-title block">
             {question.prompt}
           </label>
-          <input
-            id="answer"
-            value={answers[index] ?? ""}
-            onChange={(event) => updateAnswer(event.target.value)}
-            autoComplete="off"
-            className="field mt-4 px-3 py-3 text-lg"
-          />
+          {question.marks === 3 ? (
+            <textarea
+              id="answer"
+              value={answers[index] ?? ""}
+              onChange={(event) => updateAnswer(event.target.value)}
+              autoComplete="off"
+              rows={4}
+              className="field mt-4 px-3 py-3 text-lg"
+            />
+          ) : (
+            <input
+              id="answer"
+              value={answers[index] ?? ""}
+              onChange={(event) => updateAnswer(event.target.value)}
+              autoComplete="off"
+              className="field mt-4 px-3 py-3 text-lg"
+            />
+          )}
           <div className="mt-4 flex items-center justify-between gap-3">
             <button
               type="button"
@@ -170,7 +227,7 @@ export function TestRunner({
             </button>
             <button type="submit" className="with-salute rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-paper">
               <SaluteMark />
-              {index === total - 1 ? "Finish and mark" : "Next question"}
+              {index === questions.length - 1 ? "Finish and mark" : "Next question"}
             </button>
           </div>
         </form>
