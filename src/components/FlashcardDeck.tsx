@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { people } from "@/data/people";
 import { difficultyLabel, difficultyOf, levels, type Difficulty } from "@/lib/difficulty";
 import { isProminent } from "@/lib/roles";
@@ -38,6 +38,8 @@ export function FlashcardDeck() {
   const [flipped, setFlipped] = useState(false);
   const [known, setKnown] = useState(0);
   const [again, setAgain] = useState(0);
+  const [turning, setTurning] = useState<"out" | "in" | null>(null);
+  const pendingMark = useRef<{ id: string; remembered: boolean } | null>(null);
 
   useEffect(() => {
     setQueue(shuffle(idsFor("easy")));
@@ -48,7 +50,34 @@ export function FlashcardDeck() {
   const finished = queue.length === 0;
   const selected = levels.find((item) => item.id === level) ?? levels[0];
 
+  useEffect(() => {
+    if (turning !== "out") return;
+    const timer = window.setTimeout(() => {
+      const action = pendingMark.current;
+      pendingMark.current = null;
+      if (action) {
+        setQueue((items) => {
+          const rest = items.slice(1);
+          return action.remembered ? rest : [...rest, action.id];
+        });
+        setFlipped(false);
+        if (action.remembered) setKnown((count) => count + 1);
+        else setAgain((count) => count + 1);
+      }
+      setTurning("in");
+    }, 460);
+    return () => window.clearTimeout(timer);
+  }, [turning]);
+
+  useEffect(() => {
+    if (turning !== "in") return;
+    const timer = window.setTimeout(() => setTurning(null), 460);
+    return () => window.clearTimeout(timer);
+  }, [turning]);
+
   function start(next: Difficulty) {
+    pendingMark.current = null;
+    setTurning(null);
     setLevel(next);
     setQueue(shuffle(idsFor(next)));
     setKnown(0);
@@ -57,14 +86,21 @@ export function FlashcardDeck() {
   }
 
   function mark(remembered: boolean) {
-    if (!current) return;
-    setQueue((items) => {
-      const rest = items.slice(1);
-      return remembered ? rest : [...rest, current.id];
-    });
-    setFlipped(false);
-    if (remembered) setKnown((count) => count + 1);
-    else setAgain((count) => count + 1);
+    if (!current || pendingMark.current) return;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) {
+      const personId = current.id;
+      setQueue((items) => {
+        const rest = items.slice(1);
+        return remembered ? rest : [...rest, personId];
+      });
+      setFlipped(false);
+      if (remembered) setKnown((count) => count + 1);
+      else setAgain((count) => count + 1);
+      return;
+    }
+    pendingMark.current = { id: current.id, remembered };
+    setTurning("out");
   }
 
   return (
@@ -117,12 +153,19 @@ export function FlashcardDeck() {
             </span>
             <span>{known} known</span>
           </div>
-          <button
-            type="button"
-            onClick={() => setFlipped((value) => !value)}
-            className="panel flex w-full flex-col items-center gap-5 p-5 text-left sm:flex-row sm:items-stretch sm:p-6"
-            aria-expanded={flipped}
-          >
+          <div className="card-stage">
+            <button
+              key={current.id}
+              type="button"
+              onClick={() => {
+                if (turning) return;
+                setFlipped((value) => !value);
+              }}
+              className={`card-sheet panel flex w-full flex-col items-center gap-5 p-5 text-left sm:flex-row sm:items-stretch sm:p-6 ${
+                turning === "out" ? "is-turning-out" : ""
+              } ${turning === "in" ? "is-turning-in" : ""}`}
+              aria-expanded={flipped}
+            >
             <div className="h-44 w-32 shrink-0 overflow-hidden rounded-2xl bg-paper shadow-sm">
               <PersonPhoto src={current.photo} alt="" priority />
             </div>
@@ -150,12 +193,14 @@ export function FlashcardDeck() {
                 </>
               )}
             </div>
-          </button>
+            </button>
+          </div>
           <div className="mt-4 grid grid-cols-2 gap-3">
             <button
               type="button"
               onClick={() => mark(false)}
-              className="with-salute justify-center rounded-full border border-white/70 bg-card/80 px-4 py-3 text-sm font-medium backdrop-blur-md"
+              disabled={turning !== null}
+              className="with-salute justify-center rounded-full border border-white/70 bg-card/80 px-4 py-3 text-sm font-medium backdrop-blur-md disabled:opacity-40"
             >
               <SaluteMark />
               Show it again
@@ -163,7 +208,8 @@ export function FlashcardDeck() {
             <button
               type="button"
               onClick={() => mark(true)}
-              className="with-salute justify-center rounded-full bg-green px-4 py-3 text-sm font-medium text-white"
+              disabled={turning !== null}
+              className="with-salute justify-center rounded-full bg-green px-4 py-3 text-sm font-medium text-white disabled:opacity-40"
             >
               <SaluteMark />
               I knew it
