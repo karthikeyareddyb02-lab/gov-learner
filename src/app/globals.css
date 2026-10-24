@@ -410,11 +410,52 @@ body > :not(.sky) {
   transform: rotate(-76deg);
 }
 
+.card-stage {
+  perspective: 1400px;
+}
+
+.card-sheet {
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+.card-sheet.is-turning-out {
+  animation: page-turn-out 0.46s ease-in forwards;
+}
+
+.card-sheet.is-turning-in {
+  animation: page-turn-in 0.46s ease-out;
+}
+
+@keyframes page-turn-out {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(-96deg);
+  }
+}
+
+@keyframes page-turn-in {
+  from {
+    transform: rotateY(92deg);
+  }
+  to {
+    transform: rotateY(0deg);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sky-layer,
   .salute,
   .salute-arm {
     transition: none;
+  }
+
+  .card-sheet.is-turning-out,
+  .card-sheet.is-turning-in {
+    animation: none;
   }
 }
 
